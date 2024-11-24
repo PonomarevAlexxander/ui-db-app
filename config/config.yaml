@@ -1,0 +1,18 @@
+db:
+  type: "psql"
+  host: "postgres:5432"
+  name: "accounting_db"
+  user: "pguser"
+  password: "pgpwd"
+logger:
+  level: "debug"
+users:
+  - pass: "1234"
+    role: user
+  - pass: "0123"
+    role: admin
+roles:
+  - name: admin
+    wrights: [read, write, modify, delete]
+  - name: user
+    wrights: [read]

@@ -1,0 +1,54 @@
+version: "3.9"
+services:
+  postgres:
+    container_name: postgres
+    image: postgres:${POSTGRES_TAG}
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ../migrations/init_tables.sql:/docker-entrypoint-initdb.d/init.sql
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${DB_PORT}:5432"
+    restart: unless-stopped
+    healthcheck:
+      test: [ "CMD", "pg_isready", "-q", "-d", "${DB_NAME}", "-U", "${DB_USER}" ]
+      timeout: ${DB_HEALTHCHECK_TIMEOUT}
+      interval: ${DB_HEALTHCHECK_INTERVAL}
+      retries: 10
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 4G
+    networks:
+      - accounting-app
+
+  pgadmin:
+    image: dpage/pgadmin4:${PGADMIN_TAG}
+    container_name: pgadmin4
+    restart: unless-stopped
+    ports:
+      - "${PGADMIN_PORT}:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD}
+    deploy:
+      resources:
+        limits:
+          cpus: '0.50'
+          memory: 1G
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - accounting-app
+
+networks:
+  accounting-app:
+    driver: bridge
+
+volumes:
+  pgdata:
