@@ -1,1 +1,1 @@
-Hello, worldф
+Hello, world
